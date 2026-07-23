@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+
+  /* Paleta preto / branco / dourado do app */
+  --color-ink: #0b0b0c;       /* preto principal (fundo de headers/cards escuros) */
+  --color-ink-soft: #1a1a1c;  /* preto levemente mais claro, para gradientes */
+  --color-paper: #ffffff;     /* branco (fundo das telas) */
+  --color-cloud: #f6f5f2;     /* branco-gelo, para superfícies secundárias */
+  --color-line: #e6e3da;      /* bordas sutis sobre o branco */
+  --color-gold: #cfa646;      /* dourado principal */
+  --color-gold-soft: #e6cd8a; /* dourado claro, para hover/gradiente */
+  --color-gold-deep: #a4802f; /* dourado escuro, para texto sobre branco */
+  --color-danger: #b3261e;
+  --color-success: #1e7a4c;
+}
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-cloud);
+  color: var(--color-ink);
+  font: 15px/1.5 var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  font: inherit;
+}
+
+input,
+select {
+  font: inherit;
+}
