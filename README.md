@@ -1,6 +1,6 @@
-# 💳 Fin Bank — PicPay Simplificado
+# 💳 Fin Bank — Sistema Bancário
 
-Uma carteira digital (estilo PicPay) construída do zero: **API em Django** no
+Uma carteira digital construída do zero: **API em Django** no
 backend e **interface em React** no frontend, com autenticação, transferências
 entre usuários (Pix) e extrato — tudo com as regras de negócio e as
 preocupações de segurança de um sistema financeiro real, em escala reduzida.
@@ -30,7 +30,7 @@ de negócio, autenticação, e uma interface que consome tudo isso.
 
 ## 📱 O que o app faz
 
-Fin Bank é uma versão simplificada de uma carteira digital tipo PicPay/Nubank.
+Fin Bank é uma versão simplificada de uma carteira digital.
 Um usuário pode:
 
 1. **Criar uma conta**, como pessoa física ou como empresa.
@@ -40,8 +40,7 @@ Um usuário pode:
 4. **Ver o extrato** de tudo que enviou e recebeu, com busca por nome.
 5. **Receber um comprovante** ao final de cada transferência.
 
-Contas do tipo **empresa** só podem *receber* dinheiro, nunca enviar — a mesma
-regra que existe no PicPay de verdade para contas de lojista.
+Contas do tipo **empresa** só podem *receber* dinheiro.
 
 ---
 
@@ -115,7 +114,7 @@ flowchart LR
 ## 📂 Estrutura de pastas
 
 ```
-picpay-simplificado/
+finbank/
 ├── core/                 # Configurações gerais do Django (settings, urls, celery)
 ├── users/                # Tudo sobre usuários: model, autenticação, validação de CPF
 ├── payments/             # Tudo sobre transferências: model, regras de negócio
@@ -193,7 +192,7 @@ cabeçalho `Authorization: Bearer <token>` (obtido no login).
 
 ## 👥 Regras de negócio: pessoa física x empresa
 
-Assim como no PicPay real, o tipo de conta define o que o usuário pode fazer:
+O tipo de conta define o que o usuário pode fazer:
 
 | Permissão | Pessoa física | Empresa |
 |---|:---:|:---:|
@@ -201,7 +200,7 @@ Assim como no PicPay real, o tipo de conta define o que o usuário pode fazer:
 | Receber dinheiro | ✅ | ✅ |
 
 Ou seja: uma conta de **empresa** funciona como uma conta de recebimento (tipo
-um lojista) — ela pode vender e receber, mas não pode fazer transferências
+um lojista), ela pode vender e receber, mas não pode fazer transferências
 para outras contas.
 
 ---
