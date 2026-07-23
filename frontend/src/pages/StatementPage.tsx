@@ -37,7 +37,7 @@ export default function StatementPage() {
     <AppShell>
       <PageHeader title="Extrato detalhado" />
 
-      <div className="px-4 py-4">
+      <div className="mx-auto max-w-3xl px-4 py-4 md:px-8 md:py-6">
         <label className="flex items-center gap-2 rounded-xl border border-line bg-paper px-3 py-2.5">
           <SearchIcon width={18} height={18} className="text-ink-soft/50" />
           <input
@@ -50,7 +50,7 @@ export default function StatementPage() {
         </label>
       </div>
 
-      <div className="flex flex-col gap-4 px-4 pb-4">
+      <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 pb-4 md:px-8">
         {isLoading ? (
           <div className="flex justify-center py-10">
             <Spinner />

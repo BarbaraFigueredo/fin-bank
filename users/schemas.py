@@ -1,10 +1,12 @@
+from decimal import Decimal
+
 from ninja import ModelSchema, Schema
 from .models import User
 
 class UserSchema(ModelSchema):
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'cpf', 'email', 'password']
+        fields = ['username', 'first_name', 'last_name', 'cpf_cnpj', 'email', 'password']
 
 class TypeSchema(Schema):
     type: str
@@ -19,10 +21,15 @@ class LoginSchema(Schema):
     password: str
 
 
-class MeSchema(ModelSchema):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'cpf', 'email', 'amount']
+class MeSchema(Schema):
+    id: int
+    username: str
+    first_name: str
+    last_name: str
+    cpf_cnpj: str
+    email: str
+    amount: Decimal
+    account_type: str  # "people" ou "company"
 
 
 class UserPublicSchema(ModelSchema):

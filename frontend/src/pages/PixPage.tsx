@@ -80,7 +80,8 @@ export default function PixPage() {
         replace: true,
         state: {
           payerName: `${user?.first_name} ${user?.last_name}`.trim(),
-          payerCpf: user?.cpf,
+          payerDocument: user?.cpf_cnpj,
+          payerAccountType: user?.account_type,
           payeeName: `${recipient.first_name} ${recipient.last_name}`.trim(),
           amount: amountValue,
           date: new Date().toISOString(),
@@ -97,7 +98,7 @@ export default function PixPage() {
     <AppShell>
       <PageHeader title="Transferência Pix" />
 
-      <div className="flex flex-col gap-4 px-4 py-4">
+      <div className="mx-auto flex max-w-lg flex-col gap-4 px-4 py-6 md:px-8">
         <p className="text-sm text-ink-soft/70">
           Saldo disponível: <span className="font-semibold text-ink">{formatCurrency(balance)}</span>
         </p>

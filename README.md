@@ -33,10 +33,10 @@ de negócio, autenticação, e uma interface que consome tudo isso.
 Fin Bank é uma versão simplificada de uma carteira digital.
 Um usuário pode:
 
-1. **Criar uma conta**, como pessoa física ou como empresa.
+1. **Criar uma conta**, como pessoa física (CPF) ou como empresa (CNPJ).
 2. **Fazer login** e ver seu saldo.
 3. **Transferir dinheiro para outra pessoa (Pix)**, buscando o destinatário
-   pelo CPF ou e-mail.
+   pelo CPF/CNPJ ou e-mail.
 4. **Ver o extrato** de tudo que enviou e recebeu, com busca por nome.
 5. **Receber um comprovante** ao final de cada transferência.
 
@@ -116,7 +116,7 @@ flowchart LR
 ```
 finbank/
 ├── core/                 # Configurações gerais do Django (settings, urls, celery)
-├── users/                # Tudo sobre usuários: model, autenticação, validação de CPF
+├── users/                # Tudo sobre usuários: model, autenticação, validação de CPF/CNPJ
 ├── payments/             # Tudo sobre transferências: model, regras de negócio
 ├── requirements.txt      # Dependências do backend
 ├── manage.py             # Ponto de entrada do Django
@@ -128,7 +128,7 @@ finbank/
         ├── context/      # Estado global de autenticação (quem está logado)
         ├── hooks/        # Lógica reutilizável (ex: buscar transações)
         ├── pages/        # As telas em si (Login, Home, Extrato, Pix...)
-        └── utils/        # Formatação de moeda/data e validações (CPF, e-mail...)
+        └── utils/        # Formatação de moeda/data e validações (CPF/CNPJ, e-mail...)
 ```
 
 ---
@@ -184,7 +184,7 @@ cabeçalho `Authorization: Bearer <token>` (obtido no login).
 | `POST` | `/users/login/` | — | Faz login e retorna um token de acesso |
 | `POST` | `/users/logout/` | 🔒 | Invalida o token atual |
 | `GET` | `/users/me/` | 🔒 | Retorna os dados e o saldo do usuário logado |
-| `GET` | `/users/search/?q=` | 🔒 | Busca um destinatário por CPF ou e-mail (exato) |
+| `GET` | `/users/search/?q=` | 🔒 | Busca um destinatário por CPF/CNPJ ou e-mail (exato) |
 | `POST` | `/payments/` | 🔒 | Faz uma transferência para outro usuário |
 | `GET` | `/payments/` | 🔒 | Lista o extrato (envios e recebimentos) do usuário logado |
 
@@ -218,15 +218,15 @@ que mexe com dinheiro precisa se comportar:
   cliente.** Isso evita um problema clássico de segurança (conhecido como
   IDOR), em que alguém mal-intencionado poderia tentar descontar saldo da
   conta de outra pessoa só trocando um número na requisição.
-- **CPF é validado com o algoritmo real de dígito verificador**, tanto no
-  frontend (feedback na hora) quanto no backend (validação que realmente
-  vale).
+- **CPF/CNPJ são validados com o algoritmo real de dígito verificador**,
+  tanto no frontend (feedback na hora) quanto no backend (validação que
+  realmente vale).
 - **CORS restrito**: só o endereço do frontend (`localhost:3000` em
   desenvolvimento) pode fazer requisições à API — não é uma API aberta para
   qualquer site.
-- **Busca de destinatário só por dado exato** (CPF ou e-mail completo) — não
-  existe uma busca por nome parcial, para não permitir que qualquer pessoa
-  logada consiga "listar" outros usuários do sistema.
+- **Busca de destinatário só por dado exato** (CPF/CNPJ ou e-mail completo) —
+  não existe uma busca por nome parcial, para não permitir que qualquer
+  pessoa logada consiga "listar" outros usuários do sistema.
 
 ---
 
@@ -246,8 +246,11 @@ python manage.py test
 
 O frontend segue uma identidade visual própria — **preto, branco e dourado**
 — pensada para transmitir a seriedade de um app financeiro, com um toque
-premium. A interface é **responsiva**: funciona bem tanto em um celular
-pequeno quanto em uma tela de desktop.
+premium. A interface é **responsiva** e pensada primeiro para web: em telas
+maiores, a navegação fica em uma barra lateral fixa e o conteúdo se organiza
+em um painel amplo (saldo, dados da conta e transações lado a lado); em
+telas pequenas, o mesmo conteúdo se reorganiza em uma única coluna com
+navegação inferior, no formato de app.
 
 ---
 

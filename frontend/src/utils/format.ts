@@ -33,6 +33,20 @@ export function formatCpf(value: string): string {
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
 }
 
+export function formatCnpj(value: string): string {
+  const digits = onlyDigits(value).slice(0, 14)
+  return digits
+    .replace(/(\d{2})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1/$2')
+    .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
+}
+
+/** Formata como CPF ou CNPJ de acordo com o tipo de conta. */
+export function formatDocument(value: string, accountType: 'people' | 'company'): string {
+  return accountType === 'company' ? formatCnpj(value) : formatCpf(value)
+}
+
 export function initials(firstName: string, lastName: string): string {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
 }

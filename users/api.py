@@ -7,11 +7,26 @@ from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError
 from django.db import transaction as django_transaction
 from django.db.models import Q
-from rolepermissions.roles import assign_role
+from rolepermissions.roles import assign_role, get_user_roles
 
 users_router = Router()
 
 VALID_USER_TYPES = {"people", "company"}
+
+
+def serialize_me(user: User) -> dict:
+    roles = get_user_roles(user)
+    account_type = roles[0].get_name() if roles else "people"
+    return {
+        "id": user.id,
+        "username": user.username,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "cpf_cnpj": user.cpf_cnpj,
+        "email": user.email,
+        "amount": user.amount,
+        "account_type": account_type,
+    }
 
 @users_router.post("/", response={200: dict, 400: dict, 500: dict})
 def create_user(request, type_user_schema: TypeUserSchema):
@@ -47,7 +62,7 @@ def login(request, credentials: LoginSchema):
     token = AuthToken.objects.create(user=authenticated_user)
     return 200, {
         "token": token.key,
-        "user": MeSchema.from_orm(authenticated_user).dict(),
+        "user": serialize_me(authenticated_user),
     }
 
 
@@ -59,16 +74,16 @@ def logout(request):
 
 @users_router.get("/me/", auth=TokenAuth(), response={200: MeSchema})
 def me(request):
-    return request.auth
+    return serialize_me(request.auth)
 
 
 @users_router.get("/search/", auth=TokenAuth(), response={200: UserPublicSchema, 404: dict})
 def search_user(request, q: str):
-    """Busca um destinatário para transferência por CPF ou e-mail exatos."""
-    cpf_digits = "".join(ch for ch in q if ch.isdigit())
+    """Busca um destinatário para transferência por CPF/CNPJ ou e-mail exatos."""
+    digits = "".join(ch for ch in q if ch.isdigit())
     query = Q(email__iexact=q.strip())
-    if cpf_digits:
-        query |= Q(cpf=cpf_digits)
+    if digits:
+        query |= Q(cpf_cnpj=digits)
 
     user = User.objects.filter(query).exclude(id=request.auth.id).first()
     if user is None:

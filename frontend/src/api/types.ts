@@ -5,9 +5,10 @@ export interface Me {
   username: string
   first_name: string
   last_name: string
-  cpf: string
+  cpf_cnpj: string
   email: string
   amount: string
+  account_type: UserType
 }
 
 export interface LoginResponse {
@@ -35,7 +36,7 @@ export interface SignupPayload {
     username: string
     first_name: string
     last_name: string
-    cpf: string
+    cpf_cnpj: string
     email: string
     password: string
   }

@@ -16,13 +16,13 @@ class PaymentsPermissionsTest(TestCase):
     def test_transaction_succeeds_when_payer_and_payee_have_matching_transfer_roles(self):
         payer = User.objects.create(
             username="payer",
-            cpf="12345678909",
+            cpf_cnpj="12345678909",
             email="payer@example.com",
             amount=Decimal("100.00"),
         )
         payee = User.objects.create(
             username="payee",
-            cpf="98765432100",
+            cpf_cnpj="98765432100",
             email="payee@example.com",
             amount=Decimal("0.00"),
         )
@@ -46,13 +46,13 @@ class PaymentsPermissionsTest(TestCase):
     def test_transaction_fails_with_insufficient_balance(self):
         payer = User.objects.create(
             username="payer2",
-            cpf="11144477735",
+            cpf_cnpj="11144477735",
             email="payer2@example.com",
             amount=Decimal("10.00"),
         )
         payee = User.objects.create(
             username="payee2",
-            cpf="52998224725",
+            cpf_cnpj="52998224725",
             email="payee2@example.com",
             amount=Decimal("0.00"),
         )
@@ -68,7 +68,7 @@ class PaymentsPermissionsTest(TestCase):
     def test_transaction_cannot_transfer_to_self(self):
         payer = User.objects.create(
             username="payer3",
-            cpf="71428793860",
+            cpf_cnpj="71428793860",
             email="payer3@example.com",
             amount=Decimal("100.00"),
         )

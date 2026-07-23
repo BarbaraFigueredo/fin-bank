@@ -8,7 +8,7 @@ export function BottomNav() {
   const { logout } = useAuth()
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-paper/95 backdrop-blur">
+    <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-paper/95 backdrop-blur md:hidden">
       <div className="mx-auto flex max-w-md items-center justify-between px-4 pt-1">
         <NavLink
           to="/"

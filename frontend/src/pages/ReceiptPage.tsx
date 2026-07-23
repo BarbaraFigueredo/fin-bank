@@ -3,11 +3,13 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { AppShell } from '../components/layout/AppShell'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
-import { formatCurrency, formatCpf, formatDateTime } from '../utils/format'
+import type { UserType } from '../api/types'
+import { formatCurrency, formatDocument, formatDateTime } from '../utils/format'
 
 interface ReceiptState {
   payerName: string
-  payerCpf?: string
+  payerDocument?: string
+  payerAccountType?: UserType
   payeeName: string
   amount: string
   date: string
@@ -29,7 +31,7 @@ export default function ReceiptPage() {
       'Comprovante Fin Bank',
       `Pix enviado: ${formatCurrency(receipt.amount)}`,
       `Data: ${formatDateTime(receipt.date)}`,
-      `Origem: ${receipt.payerName}${receipt.payerCpf ? ` (${formatCpf(receipt.payerCpf)})` : ''}`,
+      `Origem: ${receipt.payerName}${receipt.payerDocument ? ` (${formatDocument(receipt.payerDocument, receipt.payerAccountType ?? 'people')})` : ''}`,
       `Destino: ${receipt.payeeName}`,
     ].join('\n')
 
@@ -44,7 +46,7 @@ export default function ReceiptPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col items-center gap-6 px-4 py-10">
+      <div className="mx-auto flex max-w-lg flex-col items-center gap-6 px-4 py-10 md:px-8 md:py-16">
         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-success/10 text-success">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="m5 13 4 4L19 7" />
@@ -61,8 +63,10 @@ export default function ReceiptPage() {
           <div className="pb-3">
             <p className="text-xs font-medium uppercase tracking-wide text-ink-soft/50">Origem</p>
             <p className="text-sm font-medium text-ink">{receipt.payerName}</p>
-            {receipt.payerCpf ? (
-              <p className="text-xs text-ink-soft/60">{formatCpf(receipt.payerCpf)}</p>
+            {receipt.payerDocument ? (
+              <p className="text-xs text-ink-soft/60">
+                {formatDocument(receipt.payerDocument, receipt.payerAccountType ?? 'people')}
+              </p>
             ) : null}
           </div>
           <div className="pt-3">
