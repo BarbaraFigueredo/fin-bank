@@ -60,8 +60,8 @@ MIDDLEWARE = [
 # CORS: apenas o frontend local pode chamar a API. A autenticação usa
 # Bearer token (não cookies), então CORS_ALLOW_CREDENTIALS permanece False.
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 
 ROOT_URLCONF = "core.urls"

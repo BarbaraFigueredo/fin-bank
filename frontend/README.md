@@ -1,32 +1,37 @@
-# React + TypeScript + Vite
+# Fin Bank — frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Frontend em React + TypeScript + Vite + Tailwind para o backend Django em `../`.
 
-Currently, two official plugins are available:
+## Rodando localmente
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Backend (na raiz do projeto):
 
-## React Compiler
+   ```bash
+   source venv/bin/activate
+   python manage.py migrate
+   python manage.py runserver 8005
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+2. Frontend:
 
-## Expanding the Oxlint configuration
+   ```bash
+   cp .env.example .env   # ajuste VITE_API_URL se o backend não estiver em localhost:8005
+   npm install
+   npm run dev
+   ```
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+   A aplicação sobe em `http://localhost:3000`.
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+## Autenticação
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+O login retorna um token Bearer (`POST /api/users/login/`) armazenado em `localStorage` e
+enviado em todas as chamadas via `Authorization: Bearer <token>`. Um 401 do backend limpa a
+sessão automaticamente (ver `src/api/client.ts`).
+
+## Estrutura
+
+- `src/api` — cliente HTTP (axios) e chamadas ao backend
+- `src/context/AuthContext.tsx` — estado de sessão (usuário logado, login/logout)
+- `src/routes/ProtectedRoute.tsx` — bloqueia rotas para quem não está autenticado
+- `src/components/ui` — componentes base (Button, TextField, Card, Logo, ...)
+- `src/pages` — telas (Login, Cadastro, Home, ...)
