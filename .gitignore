@@ -5,3 +5,5 @@ db.sqlite3
 .env
 *.log
 .DS_Store
+staticfiles/
+deploy/.suffix
