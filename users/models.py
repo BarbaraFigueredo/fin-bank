@@ -9,7 +9,7 @@ from .validators import validate_cpf_cnpj
 class User(AbstractUser):
     cpf_cnpj = models.CharField(max_length=18, unique=True, validators=[validate_cpf_cnpj])
     email = models.EmailField(unique=True)
-    amount = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    amount = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('500.00'))
 
     def save(self, *args, **kwargs):
         self.cpf_cnpj = self.cpf_cnpj.replace('.', '').replace('-', '').replace('/', '')
