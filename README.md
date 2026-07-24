@@ -23,6 +23,7 @@ de negócio, autenticação, e uma interface que consome tudo isso.
 - [Segurança](#-segurança)
 - [Testes automatizados](#-testes-automatizados)
 - [Identidade visual](#-identidade-visual)
+- [Deploy e CI/CD](#️-deploy-e-cicd)
 - [Limitações conhecidas e próximos passos](#-limitações-conhecidas-e-próximos-passos)
 - [Autora](#-autora)
 
@@ -33,7 +34,8 @@ de negócio, autenticação, e uma interface que consome tudo isso.
 Fin Bank é uma versão simplificada de uma carteira digital.
 Um usuário pode:
 
-1. **Criar uma conta**, como pessoa física (CPF) ou como empresa (CNPJ).
+1. **Criar uma conta**, como pessoa física (CPF) ou como empresa (CNPJ) — toda
+   conta nova já começa com **R$ 500,00** de saldo.
 2. **Fazer login** e ver seu saldo.
 3. **Transferir dinheiro para outra pessoa (Pix)**, buscando o destinatário
    pelo CPF/CNPJ ou e-mail.
@@ -109,6 +111,17 @@ flowchart LR
 | **React Router** | Navegação entre as telas (login, home, extrato, pix...) |
 | **Axios** | Chamadas HTTP para a API do backend |
 
+### Deploy e infraestrutura
+
+| Tecnologia | Para que serve aqui |
+|---|---|
+| **Docker** | Empacota o backend (Python + Gunicorn) numa imagem única, igual em qualquer ambiente |
+| **Azure Container Registry (ACR)** | Guarda as imagens Docker do backend |
+| **Azure Container Apps** | Roda o container do backend em produção (plano Consumption, escala a zero) |
+| **Azure Files** | Volume persistente montado no Container App, onde vive o `db.sqlite3` — sobrevive a restart/redeploy/scale-to-zero |
+| **Azure Static Web Apps** | Hospeda o build estático do frontend (React) em produção |
+| **GitHub Actions** | Pipeline de CI/CD: builda e publica backend e frontend a cada push na `main` |
+
 ---
 
 ## 📂 Estrutura de pastas
@@ -164,12 +177,6 @@ npm run dev              # sobe o app em http://localhost:3000
 
 Abra **http://localhost:3000**, crie uma conta e pronto — o app já está
 funcionando ponta a ponta.
-
-> 💡 **Observação:** contas novas começam com saldo **R$ 0,00** (não existe
-> uma tela de "depósito", pois isso não fazia parte do escopo original do
-> desafio). Para testar uma transferência, crie duas contas e adicione saldo
-> a uma delas pelo Django Admin (`http://localhost:8005/admin/`, com um
-> usuário criado via `python manage.py createsuperuser`).
 
 ---
 
@@ -254,6 +261,68 @@ navegação inferior, no formato de app.
 
 ---
 
+## ☁️ Deploy e CI/CD
+
+O app roda em produção na **Azure**, com backend e frontend publicados
+separadamente:
+
+```mermaid
+flowchart LR
+    subgraph GH["GitHub"]
+        M[push na main]
+    end
+
+    subgraph Actions["GitHub Actions"]
+        WB[backend.yml]
+        WF[frontend.yml]
+    end
+
+    subgraph Azure["Azure"]
+        ACR[(Container Registry)]
+        CA[Container Apps
+        backend / Django]
+        AF[(Azure Files
+        db.sqlite3)]
+        SWA[Static Web Apps
+        frontend / React]
+    end
+
+    M --> WB
+    M --> WF
+    WB -- "docker build/push" --> ACR
+    ACR -- "az containerapp update" --> CA
+    CA -- "volume mount" --- AF
+    WF -- "npm run build" --> SWA
+```
+
+- **Backend** roda como container no **Azure Container Apps** (plano
+  Consumption, escala a zero quando ocioso). A imagem é buildada a partir do
+  [`Dockerfile`](Dockerfile) (Python 3.11 + Gunicorn) e publicada no **Azure
+  Container Registry**. O [`entrypoint.sh`](entrypoint.sh) roda as migrations
+  antes de subir o servidor.
+- **Frontend** é buildado como site estático (`npm run build`) e publicado no
+  **Azure Static Web Apps**, já apontando para a URL do backend via a
+  variável `VITE_API_URL`.
+- **CI/CD** é feito por dois workflows independentes do GitHub Actions, cada
+  um disparado só quando os arquivos relevantes mudam num push na `main`:
+  - [`.github/workflows/backend.yml`](.github/workflows/backend.yml): login
+    na Azure, build e push da imagem Docker (tag com o SHA do commit e
+    `latest`) e atualização do Container App para usar a nova imagem.
+  - [`.github/workflows/frontend.yml`](.github/workflows/frontend.yml):
+    instala dependências, builda o frontend e publica no Static Web Apps.
+- O provisionamento inicial de toda a infraestrutura (resource group, ACR,
+  ambiente do Container Apps, a Storage Account + File Share do Azure Files,
+  o Container App e o Static Web App) é feito uma única vez pelo script
+  [`deploy/azure-deploy.sh`](deploy/azure-deploy.sh) — depois disso, quem
+  cuida de manter tudo atualizado são os workflows do GitHub Actions.
+- **Persistência do banco:** o `db.sqlite3` fica num **volume do Azure
+  Files** montado no Container App (`DB_PATH=/data/db.sqlite3`), então os
+  dados sobrevivem a restart, redeploy e ao scale-to-zero do plano
+  Consumption. `max-replicas` fica travado em `1` de propósito, já que
+  SQLite sobre um share de rede não aguenta múltiplos writers concorrentes.
+
+---
+
 ## 🔭 Limitações conhecidas e próximos passos
 
 Este projeto tem escopo propositalmente enxuto. Coisas que ficaram de fora,
@@ -264,7 +333,10 @@ mas que dariam para evoluir:
 - Notificações reais por e-mail/push (hoje a fila do Celery já existe, mas a
   notificação em si é só um exemplo simples).
 - Limite de tentativas de login (rate limiting).
-- Deploy em produção (hoje pensado para rodar localmente, com SQLite).
+- Banco de dados gerenciado em produção — hoje é SQLite sobre um volume do
+  Azure Files (ver [Deploy e CI/CD](#️-deploy-e-cicd)), o que já resolve a
+  persistência dos dados, mas não é o ideal para concorrência real. Um passo
+  natural de evolução seria migrar para um Postgres gerenciado.
 
 ---
 
