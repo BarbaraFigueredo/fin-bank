@@ -1,0 +1,48 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "core/**"
+      - "users/**"
+      - "payments/**"
+      - "requirements.txt"
+      - "Dockerfile"
+      - "entrypoint.sh"
+      - "manage.py"
+      - ".github/workflows/backend.yml"
+
+env:
+  ACR_NAME: acrpicpay29811
+  IMAGE_NAME: picpay-backend
+  RESOURCE_GROUP: rg-picpay-simplificado
+  CONTAINERAPP_NAME: picpay-api
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login no Azure Container Registry
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Build e push da imagem
+        run: |
+          IMAGE="${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          docker build -t "$IMAGE" -t "${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest" .
+          docker push "$IMAGE"
+          docker push "${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest"
+
+      - name: Atualizar o Container App
+        run: |
+          az containerapp update \
+            --name ${{ env.CONTAINERAPP_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --image ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
